@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Week 8: Los animales del zoológico</title>
+<style>
+  :root {
+    --bg: #EAF4F6; --ink: #0B2545; --muted: #46627c; --panel: #ffffff; --line: #c3d8df;
+    --btn-border: #17407A; --navy: #0B2545; --navy2: #17407A; --teal: #12A4A0; --teal-d: #0B7F7C;
+    --coral: #FF5A3C; --gold: #FFC53D; --m: #1F6FC2; --f: #D9381E; --ok: #1E9E5A;
+    --soft: #dcecf0; --art-bg: #ffffff;
+    --c-present: #12A4A0; --c-practice: #F2A900; --c-produce: #FF5A3C; --c-assign: #17407A;
+    color-scheme: light;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #071B33; --ink: #E8F4F8; --muted: #9db8cc; --panel: #10294a; --line: #2a4a6e;
+      --btn-border: #5FB8C9; --m: #6DB3FF; --f: #FF8A72; --soft: #16365c; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #071B33; --ink: #E8F4F8; --muted: #9db8cc; --panel: #10294a; --line: #2a4a6e;
+    --btn-border: #5FB8C9; --m: #6DB3FF; --f: #FF8A72; --soft: #16365c; color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    height: 100%; margin: 0; display: flex; flex-direction: column; background: var(--bg); color: var(--ink);
+    font-family: "Avenir Next", "Segoe UI", "Trebuchet MS", system-ui, -apple-system, sans-serif; overflow: hidden;
+  }
+  [hidden] { display: none !important; }
+  button { font: inherit; color: inherit; }
+
+  /* ---------- header ---------- */
+  header { padding: 8px 16px 6px; display: grid; gap: 6px; }
+  .toprow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+  .brand { min-width: 0; }
+  .brand h1 { margin: 0; font-size: clamp(16px, 2vw, 22px); font-weight: 800; line-height: 1.1; }
+  .brand p { margin: 1px 0 0; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .phases { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 auto; }
+  .pill {
+    border: 2px solid var(--line); background: var(--panel); border-radius: 999px; padding: 5px 12px; cursor: pointer;
+    font-weight: 700; font-size: 14px; display: flex; gap: 6px; align-items: center; min-height: 34px;
+  }
+  .pill i { width: 10px; height: 10px; border-radius: 50%; background: var(--pc); display: inline-block; }
+  .pill small { font-weight: 600; color: var(--muted); font-size: 12px; }
+  .pill.on { border-color: var(--pc); background: var(--pc); color: #fff; }
+  .pill.on small { color: rgba(255,255,255,.9); }
+  .pill.on i { background: #fff; }
+  .tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .clock { font-variant-numeric: tabular-nums; font-weight: 800; font-size: 18px; white-space: nowrap; }
+  .clock small { font-weight: 600; color: var(--muted); font-size: 12px; }
+  .btn {
+    font-weight: 700; font-size: 15px; min-height: 40px; padding: 6px 14px; border-radius: 10px;
+    border: 2px solid var(--btn-border); background: transparent; cursor: pointer; touch-action: manipulation;
+    transition: background .15s, transform .1s;
+  }
+  .btn:hover { background: rgba(18,164,160,.14); }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible, .thumb:focus-visible, .pill:focus-visible, .choice:focus-visible, .sc:focus-visible, .tile:focus-visible, .model:focus-visible, .reveal-btn:focus-visible {
+    outline: 3px solid var(--gold); outline-offset: 2px;
+  }
+  .btn.primary { background: var(--teal-d); border-color: var(--teal-d); color: #fff; }
+  .btn.primary:hover { background: #0a6d6a; }
+  .btn.small { min-height: 34px; padding: 3px 10px; font-size: 13px; }
+  .btn[disabled] { opacity: .4; cursor: default; }
+  .turn { display: flex; align-items: center; gap: 6px; background: var(--panel); border: 2px solid var(--line); border-radius: 999px; padding: 2px 4px 2px 12px; font-weight: 700; font-size: 14px; }
+  .turn b { color: var(--teal-d); }
+  :root[data-theme="dark"] .turn b { color: var(--teal); }
+
+  .bar { position: relative; height: 12px; border-radius: 8px; overflow: hidden; display: flex; background: var(--line); }
+  .bar .seg { height: 100%; opacity: .45; }
+  .bar .cur { position: absolute; top: 0; bottom: 0; background: rgba(255,255,255,.55); border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); }
+  .bar .now { position: absolute; top: 0; bottom: 0; width: 4px; margin-left: -2px; background: var(--ink); transition: left 1s linear; }
+  .bar .tick { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,.25); }
+
+  .popover {
+    position: absolute; right: 16px; top: 54px; z-index: 30; width: min(320px, calc(100% - 32px)); background: var(--panel);
+    border: 2px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: 0 8px 30px rgba(0,0,0,.25);
+  }
+  .popover p { margin: 0 0 8px; font-size: 14px; color: var(--muted); }
+  .popover textarea { width: 100%; min-height: 70px; font: inherit; padding: 8px; border-radius: 8px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); resize: vertical; }
+  .popover .row { display: flex; gap: 8px; margin-top: 8px; }
+
+  /* ---------- stage ---------- */
+  main { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 4px 16px 8px; }
+  .slide { min-height: 100%; display: flex; flex-direction: column; gap: 12px; }
+  h2.t { margin: 0; font-size: clamp(24px, 3.6vw, 42px); font-weight: 800; line-height: 1.05; letter-spacing: -0.01em; }
+  h2.t small { font-size: .5em; font-weight: 600; color: var(--muted); margin-left: 10px; letter-spacing: 0; }
+  .lead { margin: 0; font-size: clamp(16px, 1.9vw, 22px); color: var(--muted); font-weight: 600; }
+  .card { background: var(--panel); border: 2px solid var(--line); border-radius: 18px; padding: 14px 18px; }
+  .art-card { background: var(--art-bg); display: flex; align-items: center; justify-content: center; padding: 8px; }
+  .art { display: block; width: 100%; height: 100%; }
+  .m { color: var(--m); font-weight: 800; } .f { color: var(--f); font-weight: 800; }
+  .legend { font-size: 15px; font-weight: 700; color: var(--muted); }
+
+  /* hero (step 1) */
+  .hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: stretch; flex: 1; }
+  .goals { display: grid; gap: 10px; align-content: start; }
+  .goal { display: flex; gap: 12px; align-items: center; font-size: clamp(18px, 2.2vw, 26px); font-weight: 700; }
+  .goal span.n { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--teal-d); color: #fff; display: grid; place-items: center; font-size: 18px; }
+  .bubbles { display: grid; gap: 8px; margin-top: 6px; }
+  .bubble { max-width: 90%; padding: 10px 16px; border-radius: 18px; font-size: clamp(18px, 2.2vw, 26px); font-weight: 700; }
+  .bubble.a { background: var(--navy2); color: #fff; border-bottom-left-radius: 4px; }
+  .bubble.b { background: var(--panel); border: 2px solid var(--line); margin-left: auto; border-bottom-right-radius: 4px; }
+  .five { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .five .art-card { aspect-ratio: 1; padding: 4px; border-radius: 14px; }
+  .plan { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: 15px; color: #fff; background: var(--pc); }
+
+  /* meet (step 2) */
+  .meet { display: grid; grid-template-columns: minmax(180px, 38vh) 1fr; gap: 20px; align-items: center; flex: 1; min-height: 0; }
+  .meet .art-card { aspect-ratio: 1; width: 100%; }
+  .meet-side { display: grid; gap: 12px; justify-items: start; }
+  .count { font-weight: 700; color: var(--muted); font-size: 16px; }
+  .reveal-btn {
+    width: 100%; min-height: 130px; border: 3px dashed var(--line); border-radius: 18px; background: var(--panel); cursor: pointer;
+    display: grid; align-content: center; justify-items: center; gap: 4px; padding: 10px; font-size: 20px; font-weight: 700; color: var(--muted);
+  }
+  .reveal-btn.on { border-style: solid; border-color: var(--teal); color: var(--ink); }
+  .reveal-btn .big { font-size: clamp(34px, 5.6vw, 66px); font-weight: 800; line-height: 1.05; }
+  .reveal-btn .en { font-size: clamp(18px, 2.4vw, 28px); color: var(--muted); font-weight: 700; }
+  .reveal-btn .syl { font-size: clamp(18px, 2.2vw, 26px); font-weight: 600; color: var(--muted); }
+  .reveal-btn .syl b { color: var(--f); font-weight: 800; }
+  .reveal-btn .tipline { font-size: 16px; color: var(--teal-d); font-weight: 700; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .thumbs { display: flex; gap: 8px; justify-content: center; }
+  .thumb { width: clamp(46px, 8vh, 72px); aspect-ratio: 1; padding: 2px; border-radius: 12px; border: 3px solid var(--line); background: var(--art-bg); cursor: pointer; }
+  .thumb.on { border-color: var(--teal); }
+
+  /* models (step 3) */
+  .models { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex: 1; min-height: 0; }
+  .model { border: 2px solid var(--line); border-radius: 18px; background: var(--panel); padding: 10px; cursor: pointer; display: grid; grid-template-rows: auto 1fr; gap: 8px; text-align: center; min-height: 0; }
+  .model .art-card { aspect-ratio: 1.1; display: flex; gap: 0; }
+  .model .art-card .art { width: auto; height: 100%; max-width: 100%; }
+  .model .say { display: grid; align-content: center; gap: 4px; min-height: 90px; }
+  .model .es { font-size: clamp(20px, 2.6vw, 32px); font-weight: 800; line-height: 1.15; }
+  .model .en { font-size: clamp(15px, 1.8vw, 20px); color: var(--muted); font-weight: 700; }
+  .model .hint { color: var(--muted); font-weight: 700; font-size: 16px; }
+  .model.on { border-color: var(--teal); }
+
+  /* mystery (step 4) */
+  .mystery { display: grid; grid-template-columns: minmax(200px, 46vh) 1fr; gap: 22px; align-items: center; flex: 1; min-height: 0; }
+  .frame { aspect-ratio: 1; width: 100%; overflow: hidden; border-radius: 22px; border: 3px solid var(--line); background: var(--art-bg); }
+  .zoombox { width: 100%; height: 100%; transition: transform .8s ease; }
+  .side { display: grid; gap: 12px; align-content: center; justify-items: start; }
+  .q { margin: 0; font-size: clamp(28px, 4vw, 48px); font-weight: 800; }
+  .frames { margin: 0; font-size: clamp(20px, 2.6vw, 30px); font-weight: 700; color: var(--muted); }
+  .answer { min-height: 70px; font-size: clamp(28px, 4vw, 50px); font-weight: 800; color: var(--teal-d); opacity: 0; transition: opacity .4s; }
+  :root[data-theme="dark"] .answer { color: var(--teal); }
+  .answer.on { opacity: 1; }
+
+  /* dialogue (step 5) */
+  .dlg { display: grid; grid-template-columns: minmax(200px, 40vh) 1fr; gap: 22px; align-items: center; flex: 1; min-height: 0; }
+  .dlg .art-card { aspect-ratio: 1; display: flex; }
+  .dlg .art-card .art { width: auto; height: 100%; }
+  .lines { display: grid; gap: 10px; }
+  .line { display: flex; gap: 12px; align-items: center; font-size: clamp(22px, 3vw, 36px); font-weight: 700; }
+  .who { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--navy2); color: #fff; font-weight: 800; font-size: 20px; }
+  .who.b { background: var(--teal-d); }
+  .line .txt { flex: 1; }
+  .line .ans { min-height: 56px; display: flex; align-items: center; width: 100%; text-align: left; border: 3px dashed var(--line); border-radius: 14px; background: var(--panel); padding: 4px 14px; font-weight: 800; color: var(--muted); font-size: inherit; cursor: pointer; }
+  .line .ans.on { border: 3px solid var(--teal); color: var(--ink); }
+
+  /* zoo (step 6) */
+  .zoo { display: grid; grid-template-columns: 1.7fr 1fr; gap: 16px; flex: 1; min-height: 0; align-items: start; }
+  .scene { width: 100%; height: auto; max-height: 62vh; border-radius: 18px; border: 3px solid var(--line); display: block; background: #CFEAF5; }
+  .sc { cursor: pointer; }
+  .sc.sel { filter: drop-shadow(0 0 6px #FFC53D) drop-shadow(0 0 3px #FFC53D); }
+  .panelbox { display: grid; gap: 10px; align-content: start; }
+  .task { border: 2px solid var(--line); background: var(--panel); border-radius: 14px; padding: 8px 12px; text-align: left; cursor: pointer; width: 100%; }
+  .task .tq { font-weight: 800; font-size: clamp(16px, 1.9vw, 22px); }
+  .task .ta { display: none; font-weight: 800; color: var(--teal-d); font-size: clamp(16px, 1.9vw, 22px); margin-top: 2px; }
+  .task.on { border-color: var(--teal); }
+  .task.on .ta { display: block; }
+  :root[data-theme="dark"] .task .ta { color: var(--teal); }
+
+  /* builder (step 7) */
+  .build { display: grid; grid-template-columns: 1fr minmax(240px, 34vh); gap: 18px; flex: 1; min-height: 0; align-items: start; }
+  .pick { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 10px; }
+  .tile { border: 3px solid var(--line); background: var(--panel); border-radius: 14px; cursor: pointer; padding: 4px; font-weight: 800; font-size: clamp(16px, 2vw, 22px); }
+  .tile.animal { width: clamp(58px, 10vh, 92px); aspect-ratio: 1; background: var(--art-bg); }
+  .tile.adj { padding: 8px 14px; }
+  .tile.on { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(18,164,160,.35); }
+  .sentence { min-height: 120px; border: 3px dashed var(--line); border-radius: 18px; background: var(--panel); display: grid; align-content: center; justify-items: center; gap: 4px; padding: 10px; cursor: pointer; text-align: center; width: 100%; }
+  .sentence.on { border: 3px solid var(--teal); }
+  .sentence .es { font-size: clamp(28px, 4.4vw, 54px); font-weight: 800; line-height: 1.1; }
+  .sentence .en { font-size: clamp(18px, 2.2vw, 26px); color: var(--muted); font-weight: 700; }
+  .sentence .hint { color: var(--muted); font-weight: 700; font-size: 20px; }
+  .lab { font-weight: 800; font-size: 17px; color: var(--muted); margin: 0; }
+
+  /* assignment */
+  .qgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; flex: 1; min-height: 0; }
+  .qbox { display: grid; gap: 8px; align-content: start; }
+  .qbox h3 { margin: 0; font-size: 20px; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .choice { border: 3px solid var(--line); background: var(--panel); border-radius: 14px; padding: 6px; display: grid; gap: 4px; justify-items: center; cursor: default; position: relative; text-align: center; font-weight: 800; font-size: clamp(15px, 1.8vw, 20px); }
+  .choice .pic { background: var(--art-bg); border-radius: 10px; width: 100%; aspect-ratio: 1; display: flex; justify-content: center; }
+  .choice .pic .art { width: auto; height: 100%; }
+  .choice .badge { position: absolute; top: 6px; left: 6px; width: 30px; height: 30px; border-radius: 50%; background: var(--navy2); color: #fff; display: grid; place-items: center; font-size: 16px; z-index: 1; }
+  .choice.right { border-color: var(--ok); box-shadow: 0 0 0 3px rgba(30,158,90,.35); }
+  .choice.right::after { content: "✓"; position: absolute; top: 4px; right: 10px; color: var(--ok); font-size: 26px; font-weight: 900; }
+  .choice.wrong { opacity: .45; }
+  .twocol { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; flex: 1; min-height: 0; align-items: start; }
+  .steps { margin: 0; padding-left: 24px; font-size: clamp(18px, 2.2vw, 26px); font-weight: 700; display: grid; gap: 8px; }
+  .big-frame { font-size: clamp(26px, 4vw, 46px); font-weight: 800; background: var(--panel); border: 3px solid var(--teal); border-radius: 16px; padding: 12px 18px; text-align: center; }
+  .bank { display: flex; flex-wrap: wrap; gap: 8px; }
+  .bank span { background: var(--panel); border: 2px solid var(--line); border-radius: 10px; padding: 5px 12px; font-weight: 800; font-size: clamp(16px, 2vw, 22px); }
+  .bank span.hl { border-color: var(--gold); background: rgba(255,197,61,.28); }
+  .words3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .w3 { text-align: center; border: 3px solid var(--line); border-radius: 18px; background: var(--panel); padding: 10px; cursor: pointer; display: grid; gap: 4px; }
+  .w3 .art-card { aspect-ratio: 1.3; display: flex; }
+  .w3 .art-card .art { width: auto; height: 100%; }
+  .w3 .w { font-size: clamp(26px, 4vw, 48px); font-weight: 800; }
+  .w3 .s { font-size: clamp(18px, 2.4vw, 28px); font-weight: 700; color: var(--muted); }
+  .w3 .s b { color: var(--f); }
+  .w3.on { border-color: var(--teal); }
+  .checks { display: grid; gap: 10px; }
+  .chk { display: flex; gap: 14px; align-items: center; background: var(--panel); border: 3px solid var(--line); border-radius: 16px; padding: 12px 16px; font-size: clamp(18px, 2.2vw, 26px); font-weight: 700; cursor: pointer; text-align: left; width: 100%; }
+  .chk .box { flex: none; width: 34px; height: 34px; border-radius: 8px; border: 3px solid var(--btn-border); display: grid; place-items: center; font-weight: 900; color: #fff; }
+  .chk.on { border-color: var(--ok); }
+  .chk.on .box { background: var(--ok); border-color: var(--ok); }
+  .done-msg { font-size: clamp(26px, 4vw, 46px); font-weight: 800; color: var(--teal-d); text-align: center; margin: 6px 0 0; }
+  :root[data-theme="dark"] .done-msg { color: var(--teal); }
+
+  /* ---------- footer ---------- */
+  footer { padding: 6px 16px 10px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+  .where { flex: 1 1 260px; min-width: 0; }
+  .where b { font-size: 16px; }
+  .where div { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .dots { display: flex; gap: 5px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; border: 0; padding: 0; background: var(--line); cursor: pointer; }
+  .dot.on { background: var(--ink); transform: scale(1.25); }
+  .stimer { font-variant-numeric: tabular-nums; min-width: 150px; }
+  .stimer.done { background: var(--coral); border-color: var(--coral); color: #fff; }
+
+  @media (max-width: 860px) {
+    .hero, .meet, .mystery, .dlg, .zoo, .build, .twocol { grid-template-columns: 1fr; }
+    .models { grid-template-columns: 1fr 1fr; }
+    .qgrid, .words3 { grid-template-columns: 1fr; }
+    body { overflow: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) { .zoombox, .bar .now, .answer { transition: none; } }
+</style>
+</head>
+<body>
+
+<!-- Animal drawings, defined once and reused everywhere -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="a-leon" viewBox="0 0 200 200">
+      <ellipse cx="100" cy="158" rx="36" ry="28" fill="#F6C26B"/>
+      <ellipse cx="78" cy="186" rx="13" ry="7" fill="#F6C26B" stroke="#C8821E" stroke-width="2"/>
+      <ellipse cx="122" cy="186" rx="13" ry="7" fill="#F6C26B" stroke="#C8821E" stroke-width="2"/>
+      <g transform="translate(20 2) scale(.8)">
+        <g fill="#B85C14">
+          <circle cx="168" cy="100" r="22"/><circle cx="158.9" cy="134" r="22"/><circle cx="134" cy="158.9" r="22"/><circle cx="100" cy="168" r="22"/>
+          <circle cx="66" cy="158.9" r="22"/><circle cx="41.1" cy="134" r="22"/><circle cx="32" cy="100" r="22"/><circle cx="41.1" cy="66" r="22"/>
+          <circle cx="66" cy="41.1" r="22"/><circle cx="100" cy="32" r="22"/><circle cx="134" cy="41.1" r="22"/><circle cx="158.9" cy="66" r="22"/>
+        </g>
+        <circle cx="100" cy="100" r="64" fill="#D97A22"/>
+        <circle cx="56" cy="46" r="15" fill="#F2B25C"/><circle cx="56" cy="46" r="8" fill="#D98B6B"/>
+        <circle cx="144" cy="46" r="15" fill="#F2B25C"/><circle cx="144" cy="46" r="8" fill="#D98B6B"/>
+        <ellipse cx="100" cy="108" rx="44" ry="48" fill="#F6C26B"/>
+        <ellipse cx="100" cy="128" rx="24" ry="18" fill="#FBE3B4"/>
+        <circle cx="84" cy="98" r="6" fill="#2b1a12"/><circle cx="116" cy="98" r="6" fill="#2b1a12"/>
+        <circle cx="86" cy="96" r="2" fill="#fff"/><circle cx="118" cy="96" r="2" fill="#fff"/>
+        <path d="M89 116Q100 111 111 116Q106 128 100 128Q94 128 89 116Z" fill="#5a2a1a"/>
+        <path d="M100 128V134M100 134Q92 143 83 136M100 134Q108 143 117 136" fill="none" stroke="#5a2a1a" stroke-width="3" stroke-linecap="round"/>
+        <g fill="#C08A45"><circle cx="88" cy="126" r="1.8"/><circle cx="93" cy="130" r="1.8"/><circle cx="112" cy="126" r="1.8"/><circle cx="107" cy="130" r="1.8"/></g>
+      </g>
+    </symbol>
+
+    <symbol id="a-jirafa" viewBox="0 0 200 200">
+      <g fill="#E8A92D"><rect x="58" y="150" width="11" height="38" rx="4"/><rect x="76" y="152" width="11" height="36" rx="4"/></g>
+      <g fill="#F4B63D"><rect x="112" y="152" width="11" height="36" rx="4"/><rect x="128" y="150" width="11" height="38" rx="4"/></g>
+      <g fill="#5a3a1a"><rect x="58" y="185" width="11" height="6" rx="2"/><rect x="76" y="185" width="11" height="6" rx="2"/><rect x="112" y="185" width="11" height="6" rx="2"/><rect x="128" y="185" width="11" height="6" rx="2"/></g>
+      <path d="M52 134Q38 142 41 162" fill="none" stroke="#F4B63D" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="41" cy="164" r="4.5" fill="#5a3a1a"/>
+      <ellipse cx="100" cy="140" rx="48" ry="30" fill="#F4B63D"/>
+      <path d="M118 132L146 132L152 52L132 50Z" fill="#F4B63D"/>
+      <ellipse cx="150" cy="40" rx="22" ry="13" fill="#F4B63D"/>
+      <ellipse cx="167" cy="45" rx="10" ry="8" fill="#FBE3B4"/>
+      <circle cx="170" cy="44" r="1.6" fill="#8a5a1a"/>
+      <path d="M140 29L137 13M152 28L154 12" stroke="#8a5a1a" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="137" cy="12" r="3.6" fill="#8a5a1a"/><circle cx="154" cy="11" r="3.6" fill="#8a5a1a"/>
+      <ellipse cx="131" cy="35" rx="7" ry="3.6" transform="rotate(-30 131 35)" fill="#E8A92D"/>
+      <circle cx="153" cy="37" r="3.2" fill="#2b1a12"/>
+      <g fill="#B5651D"><circle cx="78" cy="136" r="7"/><circle cx="100" cy="151" r="8"/><circle cx="116" cy="130" r="6"/><circle cx="88" cy="153" r="4.5"/><circle cx="134" cy="72" r="5"/><circle cx="142" cy="94" r="6"/><circle cx="134" cy="114" r="5"/></g>
+    </symbol>
+
+    <symbol id="a-elefante" viewBox="0 0 200 200">
+      <g fill="#8A9BB0"><rect x="50" y="140" width="24" height="48" rx="9"/><rect x="78" y="146" width="22" height="42" rx="9"/><rect x="112" y="146" width="22" height="42" rx="9"/><rect x="138" y="140" width="24" height="48" rx="9"/></g>
+      <g fill="#fff"><rect x="53" y="181" width="6" height="5" rx="2"/><rect x="63" y="181" width="6" height="5" rx="2"/><rect x="141" y="181" width="6" height="5" rx="2"/><rect x="151" y="181" width="6" height="5" rx="2"/></g>
+      <path d="M40 108Q28 124 35 140" fill="none" stroke="#7F92AC" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="98" cy="118" rx="60" ry="44" fill="#9AAAC0"/>
+      <path d="M172 104Q194 122 185 152Q181 163 171 158" fill="none" stroke="#9AAAC0" stroke-width="15" stroke-linecap="round"/>
+      <circle cx="152" cy="94" r="33" fill="#9AAAC0"/>
+      <ellipse cx="128" cy="98" rx="23" ry="31" fill="#7F92AC" stroke="#6B7E99" stroke-width="2"/>
+      <ellipse cx="128" cy="100" rx="13" ry="21" fill="#B7C2D4"/>
+      <path d="M166 118Q180 128 171 142" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="162" cy="86" r="3.8" fill="#2b1a12"/><circle cx="163.2" cy="84.8" r="1.2" fill="#fff"/>
+    </symbol>
+
+    <symbol id="a-mono" viewBox="0 0 200 200">
+      <path d="M140 172Q196 166 182 120" fill="none" stroke="#7B4A2A" stroke-width="9" stroke-linecap="round"/>
+      <ellipse cx="62" cy="152" rx="11" ry="24" transform="rotate(20 62 152)" fill="#8B5A33"/>
+      <ellipse cx="138" cy="152" rx="11" ry="24" transform="rotate(-20 138 152)" fill="#8B5A33"/>
+      <ellipse cx="100" cy="158" rx="40" ry="32" fill="#8B5A33"/>
+      <ellipse cx="100" cy="166" rx="24" ry="22" fill="#E7C39A"/>
+      <ellipse cx="80" cy="190" rx="16" ry="7" fill="#7B4A2A"/><ellipse cx="120" cy="190" rx="16" ry="7" fill="#7B4A2A"/>
+      <circle cx="48" cy="82" r="20" fill="#8B5A33"/><circle cx="48" cy="82" r="12" fill="#E7C39A"/>
+      <circle cx="152" cy="82" r="20" fill="#8B5A33"/><circle cx="152" cy="82" r="12" fill="#E7C39A"/>
+      <circle cx="100" cy="78" r="46" fill="#8B5A33"/>
+      <circle cx="84" cy="84" r="22" fill="#E7C39A"/><circle cx="116" cy="84" r="22" fill="#E7C39A"/>
+      <ellipse cx="100" cy="102" rx="27" ry="23" fill="#E7C39A"/>
+      <circle cx="88" cy="82" r="5.5" fill="#2b1a12"/><circle cx="112" cy="82" r="5.5" fill="#2b1a12"/>
+      <circle cx="89.6" cy="80.4" r="1.8" fill="#fff"/><circle cx="113.6" cy="80.4" r="1.8" fill="#fff"/>
+      <ellipse cx="95" cy="98" rx="2.2" ry="3" fill="#5a3520"/><ellipse cx="105" cy="98" rx="2.2" ry="3" fill="#5a3520"/>
+      <path d="M86 110Q100 124 114 110" fill="none" stroke="#5a3520" stroke-width="3.2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="a-pinguino" viewBox="0 0 200 200">
+      <ellipse cx="78" cy="189" rx="17" ry="6" fill="#FF9F1C"/><ellipse cx="122" cy="189" rx="17" ry="6" fill="#FF9F1C"/>
+      <ellipse cx="100" cy="118" rx="52" ry="70" fill="#1C2A44"/>
+      <ellipse cx="44" cy="128" rx="10" ry="30" transform="rotate(14 44 128)" fill="#1C2A44"/>
+      <ellipse cx="156" cy="128" rx="10" ry="30" transform="rotate(-14 156 128)" fill="#1C2A44"/>
+      <ellipse cx="100" cy="130" rx="36" ry="54" fill="#fff"/>
+      <ellipse cx="85" cy="74" rx="15" ry="17" fill="#fff"/><ellipse cx="115" cy="74" rx="15" ry="17" fill="#fff"/>
+      <circle cx="86" cy="75" r="5.5" fill="#1C2A44"/><circle cx="114" cy="75" r="5.5" fill="#1C2A44"/>
+      <circle cx="87.6" cy="73.4" r="1.8" fill="#fff"/><circle cx="115.6" cy="73.4" r="1.8" fill="#fff"/>
+      <path d="M87 89Q100 80 113 89Q100 108 87 89Z" fill="#FF9F1C" stroke="#C97400" stroke-width="2" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header>
+  <div class="toprow">
+    <div class="brand">
+      <h1>Week 8: Los animales del zoológico</h1>
+      <p>Level 4 Spanish. Lesson: 15 minutes together, 15 minutes on assignment A08</p>
+    </div>
+    <nav class="phases" id="phases" aria-label="Lesson parts"></nav>
+    <div class="tools">
+      <div class="turn" id="turn" aria-live="polite">Turn: <b id="turnName">add names</b><button class="btn small" id="nextStu" type="button">Next student</button><button class="btn small" id="stuBtn" type="button" aria-expanded="false">Names</button></div>
+      <div class="clock" aria-label="Class clock"><span id="clockTxt">00:00</span> <small>of 30:00</small></div>
+      <button class="btn small primary" id="clockBtn" type="button">Start class</button>
+      <button class="btn small" id="clockReset" type="button" aria-label="Reset class clock">Reset</button>
+    </div>
+  </div>
+  <div class="bar" id="bar" aria-hidden="true"></div>
+  <div class="popover" id="pop" hidden>
+    <p>Type your students’ first names, separated by commas. Names stay on this screen only and are not saved.</p>
+    <textarea id="names" placeholder="Ana, Leo, Luz, ..."></textarea>
+    <div class="row"><button class="btn small primary" id="setNames" type="button">Set names</button><button class="btn small" id="closePop" type="button">Close</button></div>
+  </div>
+</header>
+
+<main id="stage"></main>
+
+<footer>
+  <div class="where"><b id="whereTitle"></b><div id="whereSub"></div></div>
+  <div class="dots" id="dots"></div>
+  <button class="btn stimer" id="stimer" type="button"></button>
+  <button class="btn" id="back" type="button">◀ Back</button>
+  <button class="btn primary" id="next" type="button">Next ▶</button>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- content ---------- */
+  var AN = [
+    { id: 'leon',     es: 'león',     def: 'el', indef: 'un',  g: 'm', en: 'lion',     syl: 'le-ÓN',      org: '50% 38%', desc: 'El león es grande.',     descEn: 'The lion is big.' },
+    { id: 'jirafa',   es: 'jirafa',   def: 'la', indef: 'una', g: 'f', en: 'giraffe',  syl: 'ji-RA-fa',   org: '68% 38%', desc: 'La jirafa es alta.',     descEn: 'The giraffe is tall.' },
+    { id: 'elefante', es: 'elefante', def: 'el', indef: 'un',  g: 'm', en: 'elephant', syl: 'e-le-FAN-te', org: '84% 60%', desc: 'El elefante es grande.', descEn: 'The elephant is big.' },
+    { id: 'mono',     es: 'mono',     def: 'el', indef: 'un',  g: 'm', en: 'monkey',   syl: 'MO-no',      org: '50% 58%', desc: 'El mono es alegre.',     descEn: 'The monkey is cheerful.' },
+    { id: 'pinguino', es: 'pingüino', def: 'el', indef: 'un',  g: 'm', en: 'penguin',  syl: 'pin-GÜI-no', org: '50% 50%', desc: 'Hay dos pingüinos.',     descEn: 'There are two penguins.' }
+  ];
+  function $(id) { return document.getElementById(id); }
+  function art(id) { return '<svg class="art" viewBox="0 0 200 200" aria-hidden="true"><use href="#a-' + id + '"/></svg>'; }
+  function wordHTML(a, kind) { var x = kind === 'indef' ? a.indef : a.def; return '<span class="' + a.g + '">' + x + '</span> ' + a.es; }
+  function sylHTML(a) {
+    return a.syl.split('-').map(function (s) { return s === s.toUpperCase() ? '<b>' + s + '</b>' : s; }).join('-');
+  }
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function fmt(s) { s = Math.max(0, Math.round(s)); var m = Math.floor(s / 60), r = s % 60; return (m < 10 ? '0' : '') + m + ':' + (r < 10 ? '0' : '') + r; }
+  function mmss(s) { var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  var PHASES = [
+    { n: 'Present',    a: 0,  b: 5,  first: 0, c: 'var(--c-present)' },
+    { n: 'Practice',   a: 5,  b: 10, first: 3, c: 'var(--c-practice)' },
+    { n: 'Produce',    a: 10, b: 15, first: 5, c: 'var(--c-produce)' },
+    { n: 'Assignment', a: 15, b: 30, first: 7, c: 'var(--c-assign)' }
+  ];
+  var TOTAL = 1800;
+
+  /* ---------- Step 1: goals + warm-up ---------- */
+  function s1(c) {
+    c.innerHTML =
+      '<div class="slide">' +
+      '<h2 class="t">Los animales del zoológico <small>Zoo animals</small></h2>' +
+      '<div class="hero"><div class="goals">' +
+        '<p class="lead">Today we can…</p>' +
+        '<div class="goal"><span class="n">1</span>identify animals from a picture.</div>' +
+        '<div class="goal"><span class="n">2</span>describe a pictured animal.</div>' +
+        '<div class="card" style="margin-top:6px"><p class="lab">Play the song (about 1:30). Animals in the song:</p><div class="bank"><span>cocodrilo</span><span>flamenco</span><span>panda</span><span class="hl">jirafa</span></div><p class="lead" style="color:var(--ink);margin-top:10px">¿Qué animal de la canción está en el zoológico hoy?</p></div>' +
+      '</div><div class="five">' + AN.map(function (a) { return '<div class="art-card card"' + (a.id === 'jirafa' ? ' style="border-color:var(--gold);border-width:4px"' : '') + '>' + art(a.id) + '</div>'; }).join('') + '</div></div>' +
+      '<div class="plan"><span class="chip" style="--pc:var(--c-present)">Present: meet the animals</span><span class="chip" style="--pc:var(--c-practice)">Practice: guess and answer</span><span class="chip" style="--pc:var(--c-produce)">Produce: make your own message</span><span class="chip" style="--pc:var(--c-assign)">Then: assignment A08</span></div>' +
+      '</div>';
+  }
+
+  /* ---------- Step 2: meet the animals ---------- */
+  var meet = { i: 0, rev: false };
+  function s2(c) {
+    function draw() {
+      var a = AN[meet.i];
+      var inner = meet.rev
+        ? '<span class="big">' + wordHTML(a, 'def') + '</span><span class="en">' + a.en + '</span><span class="syl">' + sylHTML(a) + '</span>' +
+          (a.id === 'pinguino' ? '<span class="tipline">The ü tells us to say the u sound.</span>' : '')
+        : 'Tap to reveal the word';
+      c.innerHTML =
+        '<div class="slide"><h2 class="t">Mira y escucha <small>Look and listen</small></h2>' +
+        '<div class="meet"><div class="card art-card">' + art(a.id) + '</div>' +
+        '<div class="meet-side"><div class="count">Animal ' + (meet.i + 1) + ' of 5. Say it with me.</div>' +
+        '<button class="reveal-btn ' + (meet.rev ? 'on' : '') + '" id="mrev" type="button">' + inner + '</button>' +
+        '<div class="row"><button class="btn" id="mprev" type="button">◀ Back</button><button class="btn primary" id="mnext" type="button">' + (meet.i < 4 ? 'Next animal ▶' : 'Start over') + '</button></div>' +
+        '<div class="legend"><span class="m">el / un</span> and <span class="f">la / una</span></div></div></div>' +
+        '<div class="thumbs">' + AN.map(function (x, k) { return '<button class="thumb ' + (k === meet.i ? 'on' : '') + '" data-k="' + k + '" type="button" aria-label="' + x.en + '">' + art(x.id) + '</button>'; }).join('') + '</div></div>';
+      $('mrev').onclick = function () { meet.rev = !meet.rev; draw(); };
+      $('mprev').onclick = function () { meet.i = (meet.i + 4) % 5; meet.rev = false; draw(); };
+      $('mnext').onclick = function () { meet.i = (meet.i + 1) % 5; meet.rev = false; draw(); };
+      [].forEach.call(c.querySelectorAll('.thumb'), function (b) { b.onclick = function () { meet.i = +b.getAttribute('data-k'); meet.rev = false; draw(); }; });
+    }
+    draw();
+  }
+
+  /* ---------- Step 3: model sentences ---------- */
+  var MODELS = [
+    { id: ['leon'],        es: 'Es <span class="m">un</span> león.',                 en: 'It is a lion.' },
+    { id: ['jirafa'],      es: '<span class="f">La</span> jirafa es alta.',        en: 'The giraffe is tall.' },
+    { id: ['elefante'],    es: '<span class="m">El</span> elefante es grande.',    en: 'The elephant is big.' },
+    { id: ['pinguino', 'pinguino'], es: 'Hay dos pingüinos.',                      en: 'There are two penguins.' }
+  ];
+  var modelState = [0, 0, 0, 0];
+  function s3(c) {
+    function draw() {
+      c.innerHTML =
+        '<div class="slide"><h2 class="t">Así lo decimos <small>How we say it</small></h2>' +
+        '<p class="lead">Look at the picture. Say the sentence. Then tap to check.</p>' +
+        '<div class="models">' + MODELS.map(function (m, k) {
+          var st = modelState[k];
+          var say = st === 0 ? '<span class="hint">Tap to check</span>' : '<span class="es">' + m.es + '</span>' + (st === 2 ? '<span class="en">' + m.en + '</span>' : '');
+          return '<button class="model ' + (st ? 'on' : '') + '" data-k="' + k + '" type="button"><div class="art-card card">' + m.id.map(art).join('') + '</div><div class="say">' + say + '</div></button>';
+        }).join('') + '</div>' +
+        '<div class="legend"><span class="m">el / un</span> go with masculine words. <span class="f">la / una</span> go with feminine words. <strong>Hay dos</strong> names more than one.</div></div>';
+      [].forEach.call(c.querySelectorAll('.model'), function (b) {
+        b.onclick = function () { var k = +b.getAttribute('data-k'); modelState[k] = (modelState[k] + 1) % 3; draw(); };
+      });
+    }
+    draw();
+  }
+
+  /* ---------- Step 4: mystery zoom ---------- */
+  var ZOOM = [3.6, 2.3, 1.5];
+  var myst = { order: shuffle([0, 1, 2, 3, 4]), n: 0, z: 0, rev: false };
+  function s4(c) {
+    c.innerHTML =
+      '<div class="slide"><h2 class="t">¿Qué animal es? <small>Mystery picture</small></h2>' +
+      '<div class="mystery"><div class="frame"><div class="zoombox" id="zb"></div></div>' +
+      '<div class="side"><p class="q">¿Qué animal es?</p><p class="frames">Es un… / Es una…</p>' +
+      '<div class="answer" id="ans" aria-live="polite"></div>' +
+      '<div class="row"><button class="btn" id="zout" type="button">Show more</button><button class="btn" id="zrev" type="button">Reveal</button><button class="btn primary" id="znext" type="button">Next mystery ▶</button></div>' +
+      '<div class="count" id="zc"></div></div></div></div>';
+    function upd() {
+      var a = AN[myst.order[myst.n]];
+      var z = myst.rev ? 1 : ZOOM[myst.z];
+      var zb = $('zb');
+      zb.innerHTML = art(a.id);
+      zb.style.transformOrigin = a.org;
+      zb.style.transform = 'scale(' + z + ')';
+      $('ans').textContent = myst.rev ? 'Es ' + a.indef + ' ' + a.es + '.' : '';
+      $('ans').className = 'answer' + (myst.rev ? ' on' : '');
+      $('zout').disabled = myst.rev || myst.z >= ZOOM.length - 1;
+      $('zrev').disabled = myst.rev;
+      $('zc').textContent = 'Mystery ' + (myst.n + 1) + ' of 5' + (myst.rev ? '' : '. Clue ' + (myst.z + 1) + ' of ' + ZOOM.length);
+    }
+    $('zout').onclick = function () {
+      if (myst.z < ZOOM.length - 1) { myst.z++; $('zb').style.transform = 'scale(' + ZOOM[myst.z] + ')'; upd2(); }
+    };
+    function upd2() {
+      $('zout').disabled = myst.rev || myst.z >= ZOOM.length - 1;
+      $('zc').textContent = 'Mystery ' + (myst.n + 1) + ' of 5. Clue ' + (myst.z + 1) + ' of ' + ZOOM.length;
+    }
+    $('zrev').onclick = function () { myst.rev = true; $('zb').style.transform = 'scale(1)'; $('ans').textContent = 'Es ' + AN[myst.order[myst.n]].indef + ' ' + AN[myst.order[myst.n]].es + '.'; $('ans').className = 'answer on'; $('zout').disabled = true; $('zrev').disabled = true; $('zc').textContent = 'Mystery ' + (myst.n + 1) + ' of 5'; };
+    $('znext').onclick = function () {
+      myst.n++; if (myst.n > 4) { myst.n = 0; myst.order = shuffle([0, 1, 2, 3, 4]); }
+      myst.z = 0; myst.rev = false; upd();
+    };
+    upd();
+  }
+
+  /* ---------- Step 5: question and answer ---------- */
+  var QA = [
+    { id: ['jirafa'],   a1: 'Es una jirafa.',   q2: '¿Cómo es?',              a2: 'Es alta.' },
+    { id: ['elefante'], a1: 'Es un elefante.',  q2: '¿Cómo es?',              a2: 'Es grande.' },
+    { id: ['leon'],     a1: 'Es un león.',      q2: '¿Cómo es?',              a2: 'Es grande.' },
+    { id: ['mono'],     a1: 'Es un mono.',      q2: '¿Cómo es?',              a2: 'Es alegre.' },
+    { id: ['pinguino', 'pinguino'], a1: 'Es un pingüino.', q2: '¿Cuántos pingüinos hay?', a2: 'Hay dos pingüinos.' }
+  ];
+  var qa = { i: 0, r1: false, r2: false, swap: false };
+  function s5(c) {
+    function draw() {
+      var it = QA[qa.i];
+      var askA = qa.swap ? 'Student' : 'Teacher', ansA = qa.swap ? 'Class' : 'Student';
+      c.innerHTML =
+        '<div class="slide"><h2 class="t">¿Cómo es? <small>Ask and answer</small></h2>' +
+        '<p class="lead">' + askA + ' asks. ' + ansA + ' answers. Then switch roles.</p>' +
+        '<div class="dlg"><div class="card art-card">' + it.id.map(art).join('') + '</div>' +
+        '<div class="lines">' +
+          '<div class="line"><span class="who">A</span><span class="txt">¿Qué animal es?</span></div>' +
+          '<div class="line"><span class="who b">B</span><button class="ans ' + (qa.r1 ? 'on' : '') + '" id="r1" type="button">' + (qa.r1 ? it.a1 : 'Say it. Then tap to check.') + '</button></div>' +
+          '<div class="line"><span class="who">A</span><span class="txt">' + it.q2 + '</span></div>' +
+          '<div class="line"><span class="who b">B</span><button class="ans ' + (qa.r2 ? 'on' : '') + '" id="r2" type="button">' + (qa.r2 ? it.a2 : 'Say it. Then tap to check.') + '</button></div>' +
+          '<div class="row"><button class="btn" id="sw" type="button">Switch roles</button><button class="btn primary" id="nx" type="button">Next picture ▶</button></div>' +
+        '</div></div></div>';
+      $('r1').onclick = function () { qa.r1 = !qa.r1; draw(); };
+      $('r2').onclick = function () { qa.r2 = !qa.r2; draw(); };
+      $('sw').onclick = function () { qa.swap = !qa.swap; draw(); };
+      $('nx').onclick = function () { qa.i = (qa.i + 1) % QA.length; qa.r1 = false; qa.r2 = false; draw(); };
+    }
+    draw();
+  }
+
+  /* ---------- Step 6: zoo tour ---------- */
+  var zoo = { sel: null, t: [false, false, false] };
+  function sceneSVG() {
+    function use(id, x, y, w) { return '<use href="#a-' + id + '" x="' + x + '" y="' + y + '" width="' + w + '" height="' + w + '"/>'; }
+    function g(id, label, body) { return '<g class="sc" data-a="' + id + '" tabindex="0" role="button" aria-label="' + label + '">' + body + '</g>'; }
+    return '<svg class="scene" viewBox="0 0 840 420" role="img" aria-label="A zoo with a giraffe, an elephant, a monkey, a lion and two penguins">' +
+      '<rect width="840" height="420" fill="#CFEAF5"/><circle cx="780" cy="56" r="32" fill="#FFD66B"/>' +
+      '<ellipse cx="220" cy="330" rx="440" ry="92" fill="#9BD39A"/><ellipse cx="680" cy="352" rx="380" ry="80" fill="#86C788"/>' +
+      '<rect y="326" width="840" height="94" fill="#7BC67E"/>' +
+      '<rect x="0" y="300" width="840" height="7" fill="#C98F4E"/><rect x="0" y="318" width="840" height="7" fill="#C98F4E"/>' +
+      '<g fill="#B97A3B"><rect x="40" y="290" width="9" height="46"/><rect x="200" y="290" width="9" height="46"/><rect x="360" y="290" width="9" height="46"/><rect x="520" y="290" width="9" height="46"/><rect x="680" y="290" width="9" height="46"/></g>' +
+      '<rect x="508" y="130" width="26" height="210" fill="#8B5A33"/><g fill="#5FB36A"><circle cx="500" cy="96" r="56"/><circle cx="560" cy="92" r="52"/><circle cx="530" cy="56" r="50"/></g>' +
+      '<ellipse cx="735" cy="342" rx="96" ry="18" fill="#E8F6FD"/>' +
+      g('jirafa', 'giraffe', use('jirafa', 6, 70, 280)) +
+      g('elefante', 'elephant', use('elefante', 262, 134, 224)) +
+      g('mono', 'monkey', use('mono', 462, 52, 120)) +
+      g('leon', 'lion', use('leon', 556, 208, 150)) +
+      g('pinguino', 'penguins', use('pinguino', 686, 246, 92) + use('pinguino', 756, 252, 80)) +
+      '</svg>';
+  }
+  function s6(c) {
+    var TASKS = [
+      { q: 'Name it: ¿Qué animal es?', a: 'Es un… / Es una…' },
+      { q: 'Describe it: ¿Cómo es?', a: 'El elefante es grande. La jirafa es alta.' },
+      { q: 'Count: ¿Cuántos pingüinos hay?', a: 'Hay dos pingüinos.' }
+    ];
+    function draw() {
+      var a = zoo.sel ? AN.filter(function (x) { return x.id === zoo.sel; })[0] : null;
+      var box = a
+        ? '<div class="card"><p class="lab">You tapped the ' + a.en + '</p><p class="lead" style="color:var(--ink)">Say it first:</p>' +
+          '<button class="task ' + (zoo.t[3] ? 'on' : '') + '" id="selbtn" type="button"><div class="tq">¿Qué animal es?</div><div class="ta">Es ' + a.indef + ' ' + a.es + '. ' + a.desc + '</div></button></div>'
+        : '<div class="card"><p class="lead">Tap an animal in the zoo.</p></div>';
+      c.innerHTML =
+        '<div class="slide"><h2 class="t">El zoológico <small>Zoo tour</small></h2>' +
+        '<div class="zoo"><div>' + sceneSVG() + '</div><div class="panelbox">' + box +
+        TASKS.map(function (t, k) { return '<button class="task ' + (zoo.t[k] ? 'on' : '') + '" data-k="' + k + '" type="button"><div class="tq">' + t.q + '</div><div class="ta">' + t.a + '</div></button>'; }).join('') +
+        '</div></div></div>';
+      [].forEach.call(c.querySelectorAll('.sc'), function (n) {
+        if (n.getAttribute('data-a') === zoo.sel) n.classList.add('sel');
+        function pick() { zoo.sel = n.getAttribute('data-a'); zoo.t[3] = false; draw(); }
+        n.onclick = pick;
+        n.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } };
+      });
+      [].forEach.call(c.querySelectorAll('.task[data-k]'), function (b) {
+        b.onclick = function () { var k = +b.getAttribute('data-k'); zoo.t[k] = !zoo.t[k]; draw(); };
+      });
+      var sb = $('selbtn'); if (sb) sb.onclick = function () { zoo.t[3] = !zoo.t[3]; draw(); };
+    }
+    draw();
+  }
+
+  /* ---------- Step 7: build a message ---------- */
+  var ADJ = [
+    { m: 'alto', f: 'alta', en: 'tall' }, { m: 'grande', f: 'grande', en: 'big' }, { m: 'alegre', f: 'alegre', en: 'cheerful' },
+    { m: 'tranquilo', f: 'tranquila', en: 'calm' }, { m: 'amable', f: 'amable', en: 'kind' }
+  ];
+  var bld = { a: 1, d: 0, rev: false };
+  function s7(c) {
+    function draw() {
+      var a = AN[bld.a], d = ADJ[bld.d];
+      var es = cap(a.def) + ' ' + a.es + ' es ' + (a.g === 'f' ? d.f : d.m) + '.';
+      var en = 'The ' + a.en + ' is ' + d.en + '.';
+      c.innerHTML =
+        '<div class="slide"><h2 class="t">Mi mensaje <small>Build your own message</small></h2>' +
+        '<div class="build"><div>' +
+          '<p class="lab">1. Choose an animal</p><div class="pick">' + AN.map(function (x, k) { return '<button class="tile animal ' + (k === bld.a ? 'on' : '') + '" data-a="' + k + '" type="button" aria-label="' + x.en + '">' + art(x.id) + '</button>'; }).join('') + '</div>' +
+          '<p class="lab">2. Choose a detail</p><div class="pick">' + ADJ.map(function (x, k) { return '<button class="tile adj ' + (k === bld.d ? 'on' : '') + '" data-d="' + k + '" type="button">' + x.f + '</button>'; }).join('') + '</div>' +
+          '<p class="lab">3. Say your message. Does your partner understand?</p>' +
+          '<button class="sentence ' + (bld.rev ? 'on' : '') + '" id="sen" type="button">' + (bld.rev ? '<span class="es">' + es + '</span><span class="en">' + en + '</span>' : '<span class="hint">Say it first. Then tap to check.</span>') + '</button>' +
+          '<div class="row" style="margin-top:10px"><button class="btn primary" id="spin" type="button">Surprise me</button><span class="legend">Match the ending to the animal: <span class="m">el mono es alto</span>, <span class="f">la jirafa es alta</span>.</span></div>' +
+        '</div><div class="card art-card" style="aspect-ratio:1">' + art(a.id) + '</div></div></div>';
+      [].forEach.call(c.querySelectorAll('.tile.animal'), function (b) { b.onclick = function () { bld.a = +b.getAttribute('data-a'); bld.rev = false; draw(); }; });
+      [].forEach.call(c.querySelectorAll('.tile.adj'), function (b) { b.onclick = function () { bld.d = +b.getAttribute('data-d'); bld.rev = false; draw(); }; });
+      $('sen').onclick = function () { bld.rev = !bld.rev; draw(); };
+      $('spin').onclick = function () { bld.a = Math.floor(Math.random() * AN.length); bld.d = Math.floor(Math.random() * ADJ.length); bld.rev = false; draw(); };
+    }
+    draw();
+  }
+
+  /* ---------- Step 8: Part A, listen and choose ---------- */
+  var partA = { check: false };
+  function s8(c) {
+    var Q = [
+      { a: { ids: ['leon'], t: 'el león' }, b: { ids: ['jirafa'], t: 'la jirafa' }, key: 'b' },
+      { a: { ids: ['elefante'], t: 'el elefante' }, b: { ids: ['mono'], t: 'el mono' }, key: 'a' },
+      { a: { ids: ['pinguino'], t: 'un pingüino' }, b: { ids: ['pinguino', 'pinguino'], t: 'dos pingüinos' }, key: 'b' }
+    ];
+    function draw() {
+      c.innerHTML =
+        '<div class="slide"><h2 class="t">A. Escucha y elige <small>Listen and choose</small></h2>' +
+        '<p class="lead">Listen to each message twice. On your A08 page, circle <strong>a</strong> or <strong>b</strong>.</p>' +
+        '<div class="qgrid">' + Q.map(function (q, k) {
+          function ch(letter, o) {
+            var cls = 'choice' + (partA.check ? (q.key === letter ? ' right' : ' wrong') : '');
+            return '<div class="' + cls + '"><span class="badge">' + letter + '</span><div class="pic">' + o.ids.map(art).join('') + '</div>' + o.t + '</div>';
+          }
+          return '<div class="card qbox"><h3>' + (k + 1) + '. Message ' + (k + 1) + '</h3><div class="choices">' + ch('a', q.a) + ch('b', q.b) + '</div></div>';
+        }).join('') + '</div>' +
+        '<div class="row"><button class="btn primary" id="chk" type="button">' + (partA.check ? 'Hide answers' : 'Check answers') + '</button><span class="legend">Check after everyone has listened twice.</span></div></div>';
+      $('chk').onclick = function () { partA.check = !partA.check; draw(); };
+    }
+    draw();
+  }
+
+  /* ---------- Step 9: Part B ---------- */
+  function s9(c) {
+    c.innerHTML =
+      '<div class="slide"><h2 class="t">B. Demuestra <small>Show understanding</small></h2>' +
+      '<div class="twocol"><div class="card"><ol class="steps">' +
+        '<li>Draw one animal from today’s lesson.</li><li>Label it: <span class="m">el</span> / <span class="f">la</span> + the animal.</li><li>Finish the sentence below.</li>' +
+      '</ol></div><div style="display:grid;gap:12px">' +
+        '<div class="big-frame"><span class="m">El</span> / <span class="f">La</span> ______ es ______.</div>' +
+        '<p class="lab">Word bank: animals</p><div class="bank">' + AN.map(function (a) { return '<span>' + wordHTML(a, 'def') + '</span>'; }).join('') + '</div>' +
+        '<p class="lab">Word bank: details</p><div class="bank"><span>alto / alta</span><span>grande</span><span>alegre</span><span>tranquilo / tranquila</span><span>amable</span></div>' +
+        '<p class="legend">Example: La jirafa es alta.</p>' +
+      '</div></div></div>';
+  }
+
+  /* ---------- Step 10: Part C ---------- */
+  var pron = [false, false, false];
+  function s10(c) {
+    function draw() {
+      var W = [AN[1], AN[2], AN[4]];
+      c.innerHTML =
+        '<div class="slide"><h2 class="t">C. Pronuncia <small>Listen, echo, use</small></h2>' +
+        '<p class="lead">Listen. Echo each word. Tap a word to see the strong syllable. Then say the phrase.</p>' +
+        '<div class="words3">' + W.map(function (a, k) {
+          return '<button class="w3 ' + (pron[k] ? 'on' : '') + '" data-k="' + k + '" type="button"><div class="art-card card">' + art(a.id) + '</div><div class="w">' + a.es + '</div><div class="s">' + (pron[k] ? sylHTML(a) : 'tap to see sounds') + '</div></button>';
+        }).join('') + '</div>' +
+        '<div class="big-frame">La jirafa es alta.</div>' +
+        '<p class="legend">Try it again with one change: <strong>El elefante es grande.</strong> In pingüino, the ü tells us to say the u sound.</p></div>';
+      [].forEach.call(c.querySelectorAll('.w3'), function (b) { b.onclick = function () { var k = +b.getAttribute('data-k'); pron[k] = !pron[k]; draw(); }; });
+    }
+    draw();
+  }
+
+  /* ---------- Step 11: turn in ---------- */
+  var turnIn = [false, false, false, false];
+  function s11(c) {
+    var ITEMS = ['My name and date are on the page.', 'Part A: I circled a or b for all 3 messages.', 'Part B: I drew and labeled an animal and finished the sentence.', 'Part C: I said the phrase for my teacher.'];
+    function draw() {
+      var all = turnIn.every(Boolean);
+      c.innerHTML =
+        '<div class="slide"><h2 class="t">Entrega <small>Turn in your work</small></h2>' +
+        '<p class="lead">Check each box, then turn in A08 now.</p>' +
+        '<div class="checks">' + ITEMS.map(function (t, k) { return '<button class="chk ' + (turnIn[k] ? 'on' : '') + '" data-k="' + k + '" type="button" aria-pressed="' + (turnIn[k] ? 'true' : 'false') + '"><span class="box">' + (turnIn[k] ? '✓' : '') + '</span>' + t + '</button>'; }).join('') + '</div>' +
+        (all ? '<p class="done-msg">¡Excelente trabajo! ¡Hasta luego!</p>' : '') + '</div>';
+      [].forEach.call(c.querySelectorAll('.chk'), function (b) { b.onclick = function () { var k = +b.getAttribute('data-k'); turnIn[k] = !turnIn[k]; draw(); }; });
+    }
+    draw();
+  }
+
+  var STEPS = [
+    { phase: 0, name: 'La canción y las metas', en: 'Song and goals', start: 0, secs: 120, render: s1 },
+    { phase: 0, name: 'Mira y escucha', en: 'Meet the animals', start: 120, secs: 120, render: s2 },
+    { phase: 0, name: 'Así lo decimos', en: 'Model sentences', start: 240, secs: 60, render: s3 },
+    { phase: 1, name: '¿Qué animal es?', en: 'Mystery picture', start: 300, secs: 150, render: s4 },
+    { phase: 1, name: '¿Cómo es?', en: 'Ask and answer', start: 450, secs: 150, render: s5 },
+    { phase: 2, name: 'El zoológico', en: 'Zoo tour', start: 600, secs: 150, render: s6 },
+    { phase: 2, name: 'Mi mensaje', en: 'Build your own message', start: 750, secs: 150, render: s7 },
+    { phase: 3, name: 'A. Escucha y elige', en: 'Listen and choose', start: 900, secs: 240, render: s8 },
+    { phase: 3, name: 'B. Demuestra', en: 'Show understanding', start: 1140, secs: 420, render: s9 },
+    { phase: 3, name: 'C. Pronuncia', en: 'Listen, echo, use', start: 1560, secs: 120, render: s10 },
+    { phase: 3, name: 'Entrega', en: 'Turn in', start: 1680, secs: 120, render: s11 }
+  ];
+
+  /* ---------- Chrome: phases, bar, dots ---------- */
+  var idx = 0;
+  var phasesEl = $('phases'), barEl = $('bar'), dotsEl = $('dots');
+  PHASES.forEach(function (p, k) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'pill'; b.style.setProperty('--pc', p.c);
+    b.innerHTML = '<i></i>' + p.n + ' <small>' + p.a + '–' + p.b + ' min</small>';
+    b.onclick = function () { go(p.first); };
+    phasesEl.appendChild(b);
+  });
+  PHASES.forEach(function (p) {
+    var s = document.createElement('div'); s.className = 'seg'; s.style.flex = (p.b - p.a) + ' 1 0'; s.style.background = p.c; barEl.appendChild(s);
+  });
+  var curEl = document.createElement('div'); curEl.className = 'cur'; barEl.appendChild(curEl);
+  STEPS.forEach(function (s, k) {
+    if (k > 0) { var t = document.createElement('div'); t.className = 'tick'; t.style.left = (s.start / TOTAL * 100) + '%'; barEl.appendChild(t); }
+    var d = document.createElement('button'); d.type = 'button'; d.className = 'dot'; d.setAttribute('aria-label', 'Go to step ' + (k + 1) + ': ' + s.name);
+    d.onclick = function () { go(k); }; dotsEl.appendChild(d);
+  });
+  var nowEl = document.createElement('div'); nowEl.className = 'now'; nowEl.style.left = '0%'; barEl.appendChild(nowEl);
+
+  function go(i) {
+    idx = Math.max(0, Math.min(STEPS.length - 1, i));
+    var s = STEPS[idx];
+    resetStepTimer();
+    $('stage').innerHTML = '';
+    s.render($('stage'));
+    $('stage').scrollTop = 0;
+    [].forEach.call(phasesEl.children, function (b, k) { b.classList.toggle('on', k === s.phase); });
+    [].forEach.call(dotsEl.children, function (d, k) { d.classList.toggle('on', k === idx); });
+    curEl.style.left = (s.start / TOTAL * 100) + '%';
+    curEl.style.width = (s.secs / TOTAL * 100) + '%';
+    $('whereTitle').textContent = 'Step ' + (idx + 1) + ' of ' + STEPS.length + ': ' + s.name;
+    $('whereSub').textContent = PHASES[s.phase].n + ' • ' + s.en + ' • suggested ' + mmss(s.start) + ' to ' + mmss(s.start + s.secs);
+    $('back').disabled = idx === 0;
+    $('next').disabled = idx === STEPS.length - 1;
+  }
+  $('back').onclick = function () { go(idx - 1); };
+  $('next').onclick = function () { go(idx + 1); };
+  document.addEventListener('keydown', function (e) {
+    var t = e.target && e.target.tagName;
+    if (t === 'TEXTAREA' || t === 'INPUT') return;
+    if (e.key === 'ArrowRight') go(idx + 1);
+    if (e.key === 'ArrowLeft') go(idx - 1);
+  });
+
+  /* ---------- Class clock ---------- */
+  var clock = { sec: 0, run: false, t: null };
+  function drawClock() {
+    $('clockTxt').textContent = fmt(clock.sec);
+    nowEl.style.left = Math.min(100, clock.sec / TOTAL * 100) + '%';
+    $('clockBtn').textContent = clock.run ? 'Pause' : (clock.sec > 0 ? 'Resume' : 'Start class');
+  }
+  $('clockBtn').onclick = function () {
+    clock.run = !clock.run;
+    if (clock.run) { clock.t = setInterval(function () { clock.sec += 1; drawClock(); }, 1000); }
+    else { clearInterval(clock.t); }
+    drawClock();
+  };
+  $('clockReset').onclick = function () { clearInterval(clock.t); clock.run = false; clock.sec = 0; drawClock(); };
+
+  /* ---------- Step timer (with a soft chime) ---------- */
+  var st = { left: 0, run: false, t: null, done: false };
+  var actx = null;
+  function chime() {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      if (!actx) actx = new AC(); if (actx.state === 'suspended') actx.resume();
+      [660, 880].forEach(function (f, i) {
+        var o = actx.createOscillator(), g = actx.createGain(), t0 = actx.currentTime + i * 0.25;
+        o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.08, t0 + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.5);
+        o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + 0.55);
+      });
+    } catch (e) { /* sound is optional */ }
+  }
+  function drawStepTimer() {
+    var b = $('stimer');
+    b.classList.toggle('done', st.done);
+    if (st.done) b.textContent = '¡Tiempo!';
+    else if (st.run) b.textContent = 'Pause ' + mmss(st.left);
+    else if (st.left < STEPS[idx].secs) b.textContent = 'Resume ' + mmss(st.left);
+    else b.textContent = 'Start ' + mmss(st.left) + ' timer';
+  }
+  function resetStepTimer() { clearInterval(st.t); st.run = false; st.done = false; st.left = STEPS[idx].secs; drawStepTimer(); }
+  $('stimer').onclick = function () {
+    if (st.done) { resetStepTimer(); return; }
+    st.run = !st.run;
+    if (st.run) {
+      st.t = setInterval(function () {
+        st.left -= 1;
+        if (st.left <= 0) { clearInterval(st.t); st.run = false; st.done = true; st.left = 0; chime(); }
+        drawStepTimer();
+      }, 1000);
+    } else { clearInterval(st.t); }
+    drawStepTimer();
+  };
+
+  /* ---------- Student picker (names are kept in memory only) ---------- */
+  var roster = [], queue = [], turnNow = '';
+  $('stuBtn').onclick = function () { var p = $('pop'); p.hidden = !p.hidden; $('stuBtn').setAttribute('aria-expanded', p.hidden ? 'false' : 'true'); if (!p.hidden) $('names').focus(); };
+  $('closePop').onclick = function () { $('pop').hidden = true; $('stuBtn').setAttribute('aria-expanded', 'false'); };
+  $('setNames').onclick = function () {
+    roster = $('names').value.split(/[,\n]/).map(function (s) { return s.trim(); }).filter(Boolean);
+    queue = []; turnNow = ''; $('turnName').textContent = roster.length ? 'ready' : 'add names';
+    $('pop').hidden = true; $('stuBtn').setAttribute('aria-expanded', 'false');
+  };
+  $('nextStu').onclick = function () {
+    if (!roster.length) { $('pop').hidden = false; $('names').focus(); return; }
+    if (!queue.length) { queue = shuffle(roster); if (queue.length > 1 && queue[0] === turnNow) queue.push(queue.shift()); }
+    turnNow = queue.shift(); $('turnName').textContent = turnNow;
+  };
+
+  go(0);
+  drawClock();
+})();
+</script>
+</body>
+</html>

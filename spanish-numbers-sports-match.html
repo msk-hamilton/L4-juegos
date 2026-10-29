@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sports Match: Números 1–20</title>
+<style>
+  :root {
+    --bg: #EAF4F6;
+    --ink: #0B2545;
+    --muted: #46627c;
+    --panel: #ffffff;
+    --line: #c3d8df;
+    --btn-border: #17407A;
+    --navy: #0B2545;
+    --navy2: #17407A;
+    --teal: #12A4A0;
+    --teal-d: #0B7F7C;
+    --coral: #FF5A3C;
+    --gold: #FFC53D;
+    --face: #FFFFFF;
+    --pip-off: #c3d8df;
+    color-scheme: light;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #071B33; --ink: #E8F4F8; --muted: #9db8cc; --panel: #10294a; --line: #2a4a6e;
+      --btn-border: #5FB8C9; --face: #F4F9FB; --pip-off: #2a4a6e; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #071B33; --ink: #E8F4F8; --muted: #9db8cc; --panel: #10294a; --line: #2a4a6e;
+    --btn-border: #5FB8C9; --face: #F4F9FB; --pip-off: #2a4a6e; color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    height: 100%; margin: 0; display: flex; flex-direction: column;
+    background: var(--bg); color: var(--ink);
+    font-family: "Avenir Next", "Segoe UI", "Trebuchet MS", system-ui, -apple-system, sans-serif;
+    overflow: auto;
+  }
+  [hidden] { display: none !important; }
+
+  header {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px;
+    padding: 10px 18px 6px;
+  }
+  .title h1 { margin: 0; font-size: clamp(20px, 2.8vw, 30px); font-weight: 800; letter-spacing: -0.01em; line-height: 1.1; }
+  .title p { margin: 2px 0 0; color: var(--muted); font-size: clamp(13px, 1.4vw, 16px); font-weight: 600; }
+
+  .progress { display: flex; align-items: center; gap: 12px; }
+  .pips { display: flex; gap: 5px; }
+  .pip { width: 14px; height: 14px; border-radius: 50%; background: var(--pip-off); transition: background .3s, transform .3s; }
+  .pip.on { background: var(--teal); transform: scale(1.15); }
+  .count { font-size: clamp(16px, 2vw, 22px); font-weight: 700; white-space: nowrap; }
+  .count strong { font-size: 1.35em; font-weight: 800; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+  .btn {
+    font: inherit; font-weight: 700; font-size: 15px; min-height: 44px; padding: 8px 16px;
+    border-radius: 10px; border: 2px solid var(--btn-border); background: transparent; color: var(--ink);
+    cursor: pointer; touch-action: manipulation; transition: background .15s, transform .1s;
+  }
+  .btn:hover { background: rgba(18,164,160,.14); }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible, .card:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+  .btn.primary { background: var(--teal-d); border-color: var(--teal-d); color: #fff; }
+  .btn.primary:hover { background: #0a6d6a; }
+  .btn.on { background: var(--navy2); border-color: var(--navy2); color: #fff; }
+
+  main {
+    flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center;
+    padding: 6px 14px 14px;
+  }
+  .board {
+    --gap: clamp(6px, 1.2vw, 14px);
+    --cell: 80px;
+    display: grid; grid-template-columns: repeat(5, var(--cell)); grid-auto-rows: var(--cell); gap: var(--gap);
+  }
+
+  .card {
+    width: var(--cell); height: var(--cell); padding: 0; border: 0; background: none; cursor: pointer;
+    perspective: 900px; font: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  }
+  .card .inner {
+    position: relative; width: 100%; height: 100%; transform-style: preserve-3d;
+    transition: transform .55s cubic-bezier(.3,.7,.3,1);
+  }
+  .card.up .inner { transform: rotateY(180deg); }
+  .card.up { cursor: default; }
+  .face {
+    position: absolute; inset: 0; border-radius: 14%; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  }
+  .front {
+    background: linear-gradient(155deg, var(--navy2), var(--navy));
+    border: 3px solid var(--teal); color: #fff; font-weight: 800;
+    font-size: calc(var(--cell) * 0.5); line-height: 1; letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums; transition: border-color .15s;
+  }
+  .front::after {
+    content: ""; position: absolute; inset: 7%; border-radius: 11%;
+    border: 2px solid rgba(255,255,255,.16); pointer-events: none;
+  }
+  .card:not(.up):hover .front { border-color: var(--gold); }
+  .back {
+    transform: rotateY(180deg); background: var(--face); border: 3px solid var(--line);
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .back svg { width: 84%; height: 84%; display: block; }
+  .card.matched .back { border-color: var(--teal); box-shadow: 0 0 0 4px rgba(18,164,160,.35); }
+  .card.miss .back { border-color: var(--coral); }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+    padding: 20px; background: rgba(7,27,51,.68);
+  }
+  .panel {
+    width: min(520px, 100%); max-height: 100%; overflow: auto; background: var(--panel); color: var(--ink);
+    border-radius: 18px; padding: 24px 26px; border: 2px solid var(--line);
+  }
+  .panel h2 { margin: 0 0 12px; font-size: 24px; }
+  .panel ol { margin: 0 0 18px; padding-left: 22px; line-height: 1.5; font-size: 17px; }
+  .panel li { margin-bottom: 6px; }
+  .panel .tip { margin: 0 0 18px; color: var(--muted); font-size: 15px; line-height: 1.45; }
+  .win { text-align: center; }
+  .win h2 { font-size: clamp(30px, 6vw, 52px); line-height: 1.1; margin-bottom: 8px; color: var(--teal-d); }
+  :root[data-theme="dark"] .win h2 { color: var(--teal); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .win h2 { color: var(--teal); } }
+  .win p { margin: 0 0 16px; font-size: clamp(18px, 3vw, 26px); font-weight: 700; }
+  .win .row { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 20px; }
+  .win .row span { width: 40px; height: 40px; background: var(--face); border: 2px solid var(--line); border-radius: 10px; padding: 3px; }
+  .win .row svg { width: 100%; height: 100%; display: block; }
+  .win .btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  @media (max-width: 560px) {
+    header { padding: 8px 12px 4px; gap: 8px 14px; }
+    .controls { margin-left: 0; width: 100%; }
+    .btn { padding: 6px 12px; font-size: 14px; min-height: 40px; }
+    .pip { width: 10px; height: 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card .inner { transition-duration: .01s; }
+    .pip { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">
+    <h1>Sports Match</h1>
+    <p>Números 1–20</p>
+  </div>
+  <div class="progress">
+    <div class="pips" id="pips" aria-hidden="true"></div>
+    <div class="count" aria-live="polite"><strong id="count">0</strong> of 10 pairs found</div>
+  </div>
+  <div class="controls">
+    <button class="btn primary" id="newBtn" type="button">New Game</button>
+    <button class="btn" id="resetBtn" type="button">Reset Game</button>
+    <button class="btn" id="revealBtn" type="button" aria-pressed="false">Reveal All</button>
+    <button class="btn" id="soundBtn" type="button" aria-pressed="true">Sound: On</button>
+    <button class="btn" id="helpBtn" type="button">How to Play</button>
+  </div>
+</header>
+
+<main id="main">
+  <div class="board" id="board" role="group" aria-label="20 memory cards, numbered 1 to 20"></div>
+</main>
+
+<div class="overlay" id="help" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="panel">
+    <h2 id="helpTitle">How to Play</h2>
+    <ol>
+      <li>Each number card hides a sports picture. Every picture is hiding under two cards.</li>
+      <li>A student says two numbers in Spanish.</li>
+      <li>The teacher clicks those two cards.</li>
+      <li>A match stays face up. If the pictures differ, the cards flip back after about 2 seconds.</li>
+      <li>Work together as a class to find all 10 pairs.</li>
+    </ol>
+    <p class="tip">The numbers always stay in order, so number 12 is always in the same spot. Only the pictures behind them change in a new game.</p>
+    <button class="btn primary" id="helpClose" type="button">Hide How to Play</button>
+  </div>
+</div>
+
+<div class="overlay" id="win" role="dialog" aria-modal="true" aria-labelledby="winTitle" hidden>
+  <div class="panel win">
+    <h2 id="winTitle">¡Excelente trabajo!</h2>
+    <p>You found all 10 pairs!</p>
+    <div class="row" id="winRow" aria-hidden="true"></div>
+    <div class="btns">
+      <button class="btn primary" id="againBtn" type="button">Play Again</button>
+      <button class="btn" id="viewBtn" type="button">View Board</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- SVG sports illustrations (all built in, no external files) ---------- */
+  var uid = 0;
+  function nextId() { uid += 1; return 'g' + uid; }
+
+  function pent(cx, cy, r, rot) {
+    var pts = [];
+    for (var k = 0; k < 5; k++) {
+      var a = (rot + 72 * k) * Math.PI / 180;
+      pts.push((cx + r * Math.cos(a)).toFixed(1) + ',' + (cy + r * Math.sin(a)).toFixed(1));
+    }
+    return pts.join(' ');
+  }
+
+  var SPORTS = [
+    { name: 'Soccer ball', draw: function () {
+      var s = '<circle cx="50" cy="50" r="42" fill="#fff" stroke="#0B2545" stroke-width="3"/>';
+      for (var k = 0; k < 5; k++) {
+        var a = -90 + 72 * k, rad = a * Math.PI / 180;
+        var x1 = 50 + 14 * Math.cos(rad), y1 = 50 + 14 * Math.sin(rad);
+        var x2 = 50 + 25 * Math.cos(rad), y2 = 50 + 25 * Math.sin(rad);
+        s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="#0B2545" stroke-width="2.6" stroke-linecap="round"/>';
+        var cx = 50 + 34 * Math.cos(rad), cy = 50 + 34 * Math.sin(rad);
+        s += '<polygon points="' + pent(cx, cy, 9, a + 180) + '" fill="#0B2545" stroke="#0B2545" stroke-width="1" stroke-linejoin="round"/>';
+      }
+      s += '<polygon points="' + pent(50, 50, 14, -90) + '" fill="#0B2545" stroke="#0B2545" stroke-width="1.5" stroke-linejoin="round"/>';
+      return s;
+    }},
+    { name: 'Basketball', draw: function () {
+      return '<circle cx="50" cy="50" r="42" fill="#E8742A" stroke="#4A2410" stroke-width="3"/>' +
+        '<g fill="none" stroke="#4A2410" stroke-width="2.8" stroke-linecap="round">' +
+        '<path d="M50 8V92M8 50H92"/><path d="M21 21Q43 50 21 79"/><path d="M79 21Q57 50 79 79"/></g>';
+    }},
+    { name: 'American football', draw: function () {
+      return '<g transform="rotate(-30 50 50)">' +
+        '<path d="M6 50Q50 10 94 50Q50 90 6 50Z" fill="#8B4A2B" stroke="#3B1D0E" stroke-width="3" stroke-linejoin="round"/>' +
+        '<g fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round">' +
+        '<path d="M24 39Q21 50 24 61"/><path d="M30 35Q27 50 30 65"/><path d="M76 39Q79 50 76 61"/><path d="M70 35Q73 50 70 65"/></g>' +
+        '<g stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M38 50H62"/><path d="M43 43V57"/><path d="M50 42V58"/><path d="M57 43V57"/></g></g>';
+    }},
+    { name: 'Baseball', draw: function () {
+      var id = nextId();
+      return '<defs><clipPath id="' + id + '"><circle cx="50" cy="50" r="42"/></clipPath></defs>' +
+        '<circle cx="50" cy="50" r="42" fill="#fff"/>' +
+        '<g clip-path="url(#' + id + ')" fill="none" stroke="#D62828">' +
+        '<path d="M25 2Q51 50 25 98" stroke-width="1.8"/><path d="M25 2Q51 50 25 98" stroke-width="9" stroke-dasharray="1.8 5.6"/>' +
+        '<path d="M75 2Q49 50 75 98" stroke-width="1.8"/><path d="M75 2Q49 50 75 98" stroke-width="9" stroke-dasharray="1.8 5.6"/></g>' +
+        '<circle cx="50" cy="50" r="42" fill="none" stroke="#0B2545" stroke-width="3"/>';
+    }},
+    { name: 'Tennis ball', draw: function () {
+      return '<circle cx="50" cy="50" r="42" fill="#D3E63C" stroke="#5B6A12" stroke-width="3"/>' +
+        '<g fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round">' +
+        '<path d="M19 24Q41 50 19 76"/><path d="M81 24Q59 50 81 76"/></g>';
+    }},
+    { name: 'Volleyball', draw: function () {
+      var id = nextId(), cols = ['#2D8CE0', '#FFC53D', '#2D8CE0'], g = '';
+      for (var k = 0; k < 3; k++) {
+        g += '<g transform="rotate(' + (120 * k) + ' 50 50)" fill="none" stroke-linecap="round">' +
+          '<path d="M50 50C68 44 74 24 62 -4" stroke="#0B2545" stroke-width="14"/>' +
+          '<path d="M50 50C68 44 74 24 62 -4" stroke="' + cols[k] + '" stroke-width="10.5"/></g>';
+      }
+      return '<defs><clipPath id="' + id + '"><circle cx="50" cy="50" r="42"/></clipPath></defs>' +
+        '<circle cx="50" cy="50" r="42" fill="#fff"/><g clip-path="url(#' + id + ')">' + g + '</g>' +
+        '<circle cx="50" cy="50" r="42" fill="none" stroke="#0B2545" stroke-width="3"/>';
+    }},
+    { name: 'Bowling ball', draw: function () {
+      var id = nextId();
+      return '<defs><radialGradient id="' + id + '" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#9457D6"/><stop offset="1" stop-color="#2A0A52"/></radialGradient></defs>' +
+        '<circle cx="50" cy="50" r="42" fill="url(#' + id + ')" stroke="#1B0636" stroke-width="3"/>' +
+        '<circle cx="42" cy="36" r="4.5" fill="#12051F"/><circle cx="56" cy="33" r="4.5" fill="#12051F"/><circle cx="50" cy="49" r="5.5" fill="#12051F"/>' +
+        '<ellipse cx="30" cy="27" rx="9" ry="5" transform="rotate(-35 30 27)" fill="#fff" opacity=".35"/>';
+    }},
+    { name: 'Hockey puck', draw: function () {
+      return '<g transform="translate(0 -3)">' +
+        '<path d="M12 44V62A38 15 0 0 0 88 62V44Z" fill="#1C1C24"/>' +
+        '<path d="M12 53A38 15 0 0 0 88 53" fill="none" stroke="#12A4A0" stroke-width="2.4"/>' +
+        '<ellipse cx="50" cy="44" rx="38" ry="15" fill="#3A3A46"/>' +
+        '<ellipse cx="50" cy="44" rx="30" ry="10.5" fill="none" stroke="#6A6A78" stroke-width="1.6"/>' +
+        '<path d="M24 38Q38 32 54 33" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".35"/></g>';
+    }},
+    { name: 'Golf ball', draw: function () {
+      var id = nextId(), d = '', row = 0;
+      for (var y = 14; y <= 72; y += 7.5) {
+        var off = (row % 2) * 4;
+        for (var x = 16 + off; x <= 84; x += 8) d += '<circle cx="' + x + '" cy="' + y + '" r="1.8"/>';
+        row++;
+      }
+      return '<defs><clipPath id="' + id + '"><circle cx="50" cy="42" r="30"/></clipPath></defs>' +
+        '<path d="M40 70H60L53.5 92H46.5Z" fill="#FF5A3C" stroke="#8F2B16" stroke-width="2" stroke-linejoin="round"/>' +
+        '<circle cx="50" cy="42" r="30" fill="#fff"/>' +
+        '<g clip-path="url(#' + id + ')"><circle cx="63" cy="56" r="30" fill="#0B2545" opacity=".07"/><g fill="#C5CED6">' + d + '</g></g>' +
+        '<circle cx="50" cy="42" r="30" fill="none" stroke="#8D99A6" stroke-width="2.8"/>';
+    }},
+    { name: 'Ping-pong paddle and ball', draw: function () {
+      return '<g transform="rotate(25 50 50)">' +
+        '<rect x="44" y="62" width="12" height="30" rx="4" fill="#C68642" stroke="#6B3F14" stroke-width="2.5"/>' +
+        '<path d="M44 74H56" stroke="#6B3F14" stroke-width="2"/>' +
+        '<circle cx="50" cy="38" r="28" fill="#D62828" stroke="#7A1212" stroke-width="3"/>' +
+        '<circle cx="50" cy="38" r="21" fill="none" stroke="#fff" stroke-width="2" opacity=".35"/></g>' +
+        '<circle cx="78" cy="79" r="11" fill="#FF9F1C" stroke="#B56200" stroke-width="2.5"/>' +
+        '<ellipse cx="74.5" cy="75" rx="3.5" ry="2.2" fill="#fff" opacity=".6"/>';
+    }}
+  ];
+
+  function sportSVG(i) {
+    return '<svg viewBox="0 0 100 100" role="img" aria-label="' + SPORTS[i].name + '" xmlns="http://www.w3.org/2000/svg">' + SPORTS[i].draw() + '</svg>';
+  }
+
+  /* ---------- Elements ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+  var board = $('board'), main = $('main'), pipsEl = $('pips'), countEl = $('count');
+  var revealBtn = $('revealBtn'), soundBtn = $('soundBtn');
+  var helpEl = $('help'), winEl = $('win');
+  var TOTAL_PAIRS = 10, MISMATCH_MS = 2000;
+
+  /* ---------- State ---------- */
+  var deck = [];            // deck[i] = sport index hidden under number i+1
+  var matched = {};         // card index -> true
+  var picks = [];           // currently revealed, unresolved cards (max 2)
+  var pairs = 0;
+  var busy = false;         // true while two non-matching cards are showing
+  var locked = false;       // true briefly while a new game swaps the pictures
+  var revealAll = false;
+  var soundOn = true;
+  var mismatchTimer = null, winTimer = null, swapTimer = null;
+  var cards = [];
+
+  /* ---------- Sound (tiny synthesized tones, nothing to download) ---------- */
+  var actx = null;
+  function tone(freq, start, dur, vol) {
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    var t = actx.currentTime + start;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  function play(kind) {
+    if (!soundOn) return;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!actx) actx = new AC();
+      if (actx.state === 'suspended') actx.resume();
+      if (kind === 'match') { tone(523.25, 0, 0.18, 0.07); tone(783.99, 0.12, 0.28, 0.07); }
+      else if (kind === 'miss') { tone(233, 0, 0.22, 0.05); tone(196, 0.14, 0.28, 0.05); }
+      else if (kind === 'win') { [523.25, 659.25, 783.99, 1046.5].forEach(function (f, i) { tone(f, i * 0.13, 0.35, 0.07); }); }
+      else if (kind === 'tick') { tone(660, 0, 0.1, 0.05); }
+    } catch (e) { /* sound is optional */ }
+  }
+
+  /* ---------- Build the board ---------- */
+  function buildBoard() {
+    for (var i = 0; i < 20; i++) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'card';
+      b.innerHTML = '<div class="inner"><div class="face front">' + (i + 1) + '</div><div class="face back"></div></div>';
+      (function (idx) { b.addEventListener('click', function () { onCard(idx); }); })(i);
+      board.appendChild(b);
+      cards.push(b);
+    }
+    for (var p = 0; p < TOTAL_PAIRS; p++) {
+      var s = document.createElement('span'); s.className = 'pip'; pipsEl.appendChild(s);
+    }
+  }
+
+  function fillBacks() {
+    for (var i = 0; i < 20; i++) cards[i].querySelector('.back').innerHTML = sportSVG(deck[i]);
+  }
+
+  function shuffledDeck() {
+    var d = [];
+    for (var i = 0; i < TOTAL_PAIRS; i++) d.push(i, i);
+    for (var j = d.length - 1; j > 0; j--) {
+      var k = Math.floor(Math.random() * (j + 1)), t = d[j]; d[j] = d[k]; d[k] = t;
+    }
+    return d;
+  }
+
+  /* ---------- Rendering ---------- */
+  function isUp(i) { return !!matched[i] || picks.indexOf(i) !== -1 || revealAll; }
+
+  function renderCard(i) {
+    var c = cards[i], up = isUp(i);
+    c.classList.toggle('up', up);
+    c.classList.toggle('matched', !!matched[i]);
+    c.setAttribute('aria-label', up ? 'Card ' + (i + 1) + ': ' + SPORTS[deck[i]].name : 'Card ' + (i + 1));
+  }
+  function renderAll() {
+    for (var i = 0; i < 20; i++) renderCard(i);
+    countEl.textContent = pairs;
+    var pips = pipsEl.children;
+    for (var p = 0; p < pips.length; p++) pips[p].classList.toggle('on', p < pairs);
+    revealBtn.textContent = revealAll ? 'Hide All' : 'Reveal All';
+    revealBtn.setAttribute('aria-pressed', revealAll ? 'true' : 'false');
+    revealBtn.classList.toggle('on', revealAll);
+  }
+
+  /* ---------- Gameplay ---------- */
+  function onCard(i) {
+    if (locked || busy || revealAll || matched[i] || picks.indexOf(i) !== -1) return;
+    picks.push(i);
+    renderCard(i);
+    if (picks.length < 2) return;
+
+    var a = picks[0], b = picks[1];
+    if (deck[a] === deck[b]) {
+      matched[a] = true; matched[b] = true;
+      picks = [];
+      pairs += 1;
+      renderAll();
+      if (pairs === TOTAL_PAIRS) {
+        winTimer = setTimeout(showWin, 900);
+      } else {
+        play('match');
+      }
+    } else {
+      busy = true;
+      cards[a].classList.add('miss'); cards[b].classList.add('miss');
+      play('miss');
+      mismatchTimer = setTimeout(function () {
+        mismatchTimer = null;
+        cards[a].classList.remove('miss'); cards[b].classList.remove('miss');
+        picks = []; busy = false;
+        renderCard(a); renderCard(b);
+      }, MISMATCH_MS);
+    }
+  }
+
+  function clearPending() {
+    if (mismatchTimer) { clearTimeout(mismatchTimer); mismatchTimer = null; }
+    if (winTimer) { clearTimeout(winTimer); winTimer = null; }
+    cards.forEach(function (c) { c.classList.remove('miss'); });
+    picks = []; busy = false;
+  }
+
+  function showWin() {
+    winTimer = null;
+    play('win');
+    winEl.hidden = false;
+    $('againBtn').focus();
+  }
+
+  function resetGame() {
+    clearPending();
+    matched = {}; pairs = 0; revealAll = false;
+    winEl.hidden = true;
+    renderAll();
+  }
+
+  function newGame() {
+    var anyUp = pairs > 0 || picks.length > 0 || revealAll;
+    deck = shuffledDeck();           // new arrangement; numbers never move
+    resetGame();
+    if (swapTimer) clearTimeout(swapTimer);
+    if (anyUp) {
+      // wait for the cards to flip face-down before the pictures underneath change
+      locked = true;
+      swapTimer = setTimeout(function () { swapTimer = null; fillBacks(); renderAll(); locked = false; }, 650);
+    } else {
+      fillBacks(); renderAll();
+    }
+  }
+
+  function toggleReveal() {
+    if (locked) return;
+    clearPending();
+    revealAll = !revealAll;
+    renderAll();
+  }
+
+  /* ---------- Layout: keep all 20 cards on screen with no scrolling ---------- */
+  function fit() {
+    var r = main.getBoundingClientRect(), cs = getComputedStyle(main);
+    var aw = r.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var ah = r.height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    var g = parseFloat(getComputedStyle(board).columnGap) || 10;
+    var cell = Math.floor(Math.min((aw - 4 * g) / 5, (ah - 3 * g) / 4));
+    if (!isFinite(cell) || cell < 44) cell = 44;
+    board.style.setProperty('--cell', cell + 'px');
+  }
+
+  /* ---------- Wire up ---------- */
+  $('newBtn').addEventListener('click', newGame);
+  $('againBtn').addEventListener('click', newGame);
+  $('viewBtn').addEventListener('click', function () { winEl.hidden = true; });
+  $('resetBtn').addEventListener('click', resetGame);
+  revealBtn.addEventListener('click', toggleReveal);
+  soundBtn.addEventListener('click', function () {
+    soundOn = !soundOn;
+    soundBtn.textContent = 'Sound: ' + (soundOn ? 'On' : 'Off');
+    soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
+    soundBtn.classList.toggle('on', !soundOn);
+    if (soundOn) play('tick');
+  });
+  $('helpBtn').addEventListener('click', function () { helpEl.hidden = false; $('helpClose').focus(); });
+  $('helpClose').addEventListener('click', function () { helpEl.hidden = true; });
+  helpEl.addEventListener('click', function (e) { if (e.target === helpEl) helpEl.hidden = true; });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { helpEl.hidden = true; }
+  });
+  window.addEventListener('resize', fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(main);
+
+  // winning row of sports pictures
+  var row = $('winRow');
+  for (var s = 0; s < SPORTS.length; s++) { var sp = document.createElement('span'); sp.innerHTML = sportSVG(s); row.appendChild(sp); }
+
+  buildBoard();
+  deck = shuffledDeck();
+  fillBacks();
+  renderAll();
+  fit();
+  requestAnimationFrame(fit);
+})();
+</script>
+</body>
+</html>
